@@ -11,10 +11,10 @@ export type CryptAlgorithms = "aes-128-gcm" | "aes-192-gcm" | "aes-256-gcm";
 
 /** Hash sizes */
 export const _hashSizes: { [k in HashAlgorithm]: number } = {
-	md5: 128,
-	sha1: 160,
-	sha256: 256,
-	sha512: 512,
+	md5: 16,
+	sha1: 20,
+	sha256: 32,
+	sha512: 64,
 };
 
 /**
@@ -26,7 +26,7 @@ export const _hashSizes: { [k in HashAlgorithm]: number } = {
 export function sign(
 	data: string | Buffer,
 	secret: string | Buffer,
-	algorithm: HashAlgorithm = "sha256"
+	algorithm: HashAlgorithm = "sha512"
 ): Buffer {
 	if (typeof data === "string") data = Buffer.from(data, "utf8");
 	const hashAlg = createHmac(algorithm, secret);
@@ -37,15 +37,15 @@ export function sign(
 /** verify and return data */
 export function verify(
 	data: string | Buffer,
-	secret: string,
-	hashAlgorithm: HashAlgorithm = "sha256"
+	secret: string | Buffer,
+	hashAlgorithm: HashAlgorithm = "sha512"
 ) {
 	if (typeof data === "string") data = Buffer.from(data, "base64url");
 	//* Decode signed data: Buffer.concat([B_ENCODE_TYPE_SIGN, hashAlg.digest(), data]);
 	var hashSize = _hashSizes[hashAlgorithm],
 		i: number;
-	var hash = data.slice(1, (i = hashSize + 1));
-	var resultData = data.slice(i);
+	var hash = data.slice(0, hashSize);
+	var resultData = data.slice(hashSize);
 	//* Check data correct
 	const hashAlg = createHmac(hashAlgorithm, secret);
 	hashAlg.update(resultData);
@@ -66,7 +66,7 @@ export function verify(
 export function encrypt(
 	data: string | Buffer,
 	secret: string,
-	hashAlgorithm: HashAlgorithm = "sha256",
+	hashAlgorithm: HashAlgorithm = "sha512",
 	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
 ) {
 	if (typeof data === "string") data = Buffer.from(data, "utf8");
@@ -91,7 +91,7 @@ export function encrypt(
 export function decrypt(
 	data: string | Buffer,
 	secret: string,
-	hashAlgorithm: HashAlgorithm = "sha256",
+	hashAlgorithm: HashAlgorithm = "sha512",
 	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
 ) {
 	// if (typeof data === "string") data = Buffer.from(data, "base64url");

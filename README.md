@@ -1,6 +1,7 @@
 # web-token
 
 Generate safe tokens for web and networks
+Fast & memory wise alternative for "jws" & "jwt" & "json web token"
 
 # Sign key
 
@@ -19,6 +20,20 @@ const signedKey: Buffer= sign(
 // Convert to string using any encoding
 const encodedSignedKey= signedKey.toString('base64url');
 ```
+
+_Supported encoding by "::toString" are:_
+
+-   ascii
+-   utf8
+-   utf-8
+-   utf16le
+-   ucs2
+-   ucs-2
+-   base64
+-   base64url
+-   latin1
+-   binary
+-   hex'
 
 # Examples:
 
