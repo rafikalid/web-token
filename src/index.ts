@@ -1,17 +1,21 @@
 import { createHmac, createHash, createCipheriv, randomBytes } from "crypto";
+import { ErrorCodes, HError } from "./errors";
 
 const IV = randomBytes(16);
 
-/** Use compiler */
-export enum EncoderType {
-	SIGN,
-	ENCODE,
-}
-//* ENCODE TYPES
-const B_ENCODE_TYPE_SIGN = Buffer.alloc(1);
-B_ENCODE_TYPE_SIGN.writeUInt8(EncoderType.SIGN);
-const B_ENCODE_TYPE_ENCODE = Buffer.alloc(1);
-B_ENCODE_TYPE_ENCODE.writeUInt8(EncoderType.ENCODE);
+/** Supported hash algorithms */
+export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha512";
+
+/** Crypt algorithms */
+export type CryptAlgorithms = "aes-128-gcm" | "aes-192-gcm" | "aes-256-gcm";
+
+/** Hash sizes */
+export const _hashSizes: { [k in HashAlgorithm]: number } = {
+	md5: 128,
+	sha1: 160,
+	sha256: 256,
+	sha512: 512,
+};
 
 /**
  * Generate token from Data
@@ -21,19 +25,45 @@ B_ENCODE_TYPE_ENCODE.writeUInt8(EncoderType.ENCODE);
  */
 export function sign(
 	data: string | Buffer,
-	secret: string,
+	secret: string | Buffer,
 	algorithm: HashAlgorithm = "sha256"
 ): Buffer {
 	if (typeof data === "string") data = Buffer.from(data, "utf8");
 	const hashAlg = createHmac(algorithm, secret);
 	hashAlg.update(data);
-	return Buffer.concat([B_ENCODE_TYPE_SIGN, hashAlg.digest(), data]);
+	return Buffer.concat([hashAlg.digest(), data]);
+}
+
+/** verify and return data */
+export function verify(
+	data: string | Buffer,
+	secret: string,
+	hashAlgorithm: HashAlgorithm = "sha256"
+) {
+	if (typeof data === "string") data = Buffer.from(data, "base64url");
+	//* Decode signed data: Buffer.concat([B_ENCODE_TYPE_SIGN, hashAlg.digest(), data]);
+	var hashSize = _hashSizes[hashAlgorithm],
+		i: number;
+	var hash = data.slice(1, (i = hashSize + 1));
+	var resultData = data.slice(i);
+	//* Check data correct
+	const hashAlg = createHmac(hashAlgorithm, secret);
+	hashAlg.update(resultData);
+	var resultHash = hashAlg.digest();
+	if (resultHash.compare(hash) !== 0)
+		throw new HError(
+			ErrorCodes.WRONG_HASH,
+			`Wrong data hash. Expected: "${resultHash.toString(
+				"hex"
+			)}", received: "${hash.toString("hex")}"`
+		);
+	return resultData;
 }
 
 /**
- * Encode data
+ * Encrypt data
  */
-export function encode(
+export function encrypt(
 	data: string | Buffer,
 	secret: string,
 	hashAlgorithm: HashAlgorithm = "sha256",
@@ -51,19 +81,23 @@ export function encode(
 	// Crypt all
 	const c = createCipheriv(cryptAlgorithm, secret, IV);
 	c.update(b2crypt);
-	return Buffer.concat([B_ENCODE_TYPE_ENCODE, IV, c.final(), c.getAuthTag()]);
+	return Buffer.concat([IV, c.final(), c.getAuthTag()]);
 }
 
-/** Decode data */
-export function decode(
+/**
+ * Decrypt data
+ * @param {Buffer|base64url_string} data - data to decode. If string and not base64url, convert it to buffer with your logic: like Buffer.from(data, "Encoding")
+ */
+export function decrypt(
 	data: string | Buffer,
 	secret: string,
 	hashAlgorithm: HashAlgorithm = "sha256",
 	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
-) {}
-
-/** Supported hash algorithms */
-export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha512";
-
-/** Crypt algorithms */
-export type CryptAlgorithms = "aes-128-gcm" | "aes-192-gcm" | "aes-256-gcm";
+) {
+	// if (typeof data === "string") data = Buffer.from(data, "base64url");
+	// // Decrypt data
+	// const iv = data.slice(0, 16);
+	// const c = createCipheriv(cryptAlgorithm, secret, IV);
+	// TODO
+	throw new Error("Unimplemented!");
+}
