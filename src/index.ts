@@ -7,7 +7,7 @@ const IV = randomBytes(16);
 export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha512";
 
 /** Crypt algorithms */
-export type CryptAlgorithms = "aes-128-gcm" | "aes-192-gcm" | "aes-256-gcm";
+// export type CryptAlgorithms = "aes-128-gcm" | "aes-192-gcm" | "aes-256-gcm";
 
 /** Hash sizes */
 export const _hashSizes: { [k in HashAlgorithm]: number } = {
@@ -60,44 +60,44 @@ export function verify(
 	return resultData;
 }
 
-/**
- * Encrypt data
- */
-export function encrypt(
-	data: string | Buffer,
-	secret: string,
-	hashAlgorithm: HashAlgorithm = "sha512",
-	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
-) {
-	if (typeof data === "string") data = Buffer.from(data, "utf8");
-	// Create hash
-	const hashAlg = createHash(hashAlgorithm);
-	hashAlg.update(data);
-	const hash = hashAlg.digest();
-	// Concat data & hash
-	const b2crypt = Buffer.alloc(data.length + hash.length);
-	hash.copy(b2crypt, 0);
-	data.copy(b2crypt, hash.length);
-	// Crypt all
-	const c = createCipheriv(cryptAlgorithm, secret, IV);
-	c.update(b2crypt);
-	return Buffer.concat([IV, c.final(), c.getAuthTag()]);
-}
+// /**
+//  * Encrypt data
+//  */
+// export function encrypt(
+// 	data: string | Buffer,
+// 	secret: string,
+// 	hashAlgorithm: HashAlgorithm = "sha512",
+// 	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
+// ) {
+// 	if (typeof data === "string") data = Buffer.from(data, "utf8");
+// 	// Create hash
+// 	const hashAlg = createHash(hashAlgorithm);
+// 	hashAlg.update(data);
+// 	const hash = hashAlg.digest();
+// 	// Concat data & hash
+// 	const b2crypt = Buffer.alloc(data.length + hash.length);
+// 	hash.copy(b2crypt, 0);
+// 	data.copy(b2crypt, hash.length);
+// 	// Crypt all
+// 	const c = createCipheriv(cryptAlgorithm, secret, IV);
+// 	c.update(b2crypt);
+// 	return Buffer.concat([IV, c.final(), c.getAuthTag()]);
+// }
 
-/**
- * Decrypt data
- * @param {Buffer|base64url_string} data - data to decode. If string and not base64url, convert it to buffer with your logic: like Buffer.from(data, "Encoding")
- */
-export function decrypt(
-	data: string | Buffer,
-	secret: string,
-	hashAlgorithm: HashAlgorithm = "sha512",
-	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
-) {
-	// if (typeof data === "string") data = Buffer.from(data, "base64url");
-	// // Decrypt data
-	// const iv = data.slice(0, 16);
-	// const c = createCipheriv(cryptAlgorithm, secret, IV);
-	// TODO
-	throw new Error("Unimplemented!");
-}
+// /**
+//  * Decrypt data
+//  * @param {Buffer|base64url_string} data - data to decode. If string and not base64url, convert it to buffer with your logic: like Buffer.from(data, "Encoding")
+//  */
+// export function decrypt(
+// 	data: string | Buffer,
+// 	secret: string,
+// 	hashAlgorithm: HashAlgorithm = "sha512",
+// 	cryptAlgorithm: CryptAlgorithms = "aes-256-gcm"
+// ) {
+// 	// if (typeof data === "string") data = Buffer.from(data, "base64url");
+// 	// // Decrypt data
+// 	// const iv = data.slice(0, 16);
+// 	// const c = createCipheriv(cryptAlgorithm, secret, IV);
+// 	// TODO
+// 	throw new Error("Unimplemented!");
+// }
