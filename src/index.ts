@@ -1,4 +1,4 @@
-import { createHmac, createHash, createCipheriv, randomBytes } from "crypto";
+import { createHmac, randomBytes } from "crypto";
 import { ErrorCodes, HError } from "./errors";
 
 const IV = randomBytes(16);
@@ -101,3 +101,15 @@ export function verify(
 // 	// TODO
 // 	throw new Error("Unimplemented!");
 // }
+
+//* HASH PASSWORDS
+export function hash(
+	data: string | Buffer,
+	secret: string | Buffer,
+	hashAlgorithm: HashAlgorithm = "sha512"
+): Buffer {
+	if (typeof data === "string") data = Buffer.from(data, "utf8");
+	const hashAlg = createHmac(hashAlgorithm, secret);
+	hashAlg.update(data);
+	return hashAlg.digest();
+}

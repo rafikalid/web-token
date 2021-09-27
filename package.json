@@ -1,9 +1,12 @@
 {
 	"name": "web-token",
-	"version": "1.0.5",
+	"version": "1.1.1",
 	"description": "Fast and safe token generator for web and any app",
-	"main": "dist/index.js",
-	"type": "module",
+	"main": "dist/commonjs/index.js",
+	"exports": {
+		"require": "./dist/commonjs/index.js",
+		"import": "./dist/module/index.mjs"
+	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -26,12 +29,15 @@
 	"homepage": "https://github.com/rafikalid/web-token#readme",
 	"devDependencies": {
 		"@types/gulp": "^4.0.8",
+		"@types/gulp-rename": "^2.0.1",
 		"@types/gulp-sourcemaps": "0.0.34",
 		"@types/through2": "^2.0.36",
 		"gulp": "^4.0.2",
+		"gulp-rename": "^2.0.0",
 		"gulp-sourcemaps": "^3.0.0",
 		"gulp-typescript": "^6.0.0-alpha.1",
 		"json5": "^2.2.0",
-		"typescript": "^4.3.5"
+		"typescript": "^4.3.5",
+		"typescript-path-fix": "^1.0.5"
 	}
 }

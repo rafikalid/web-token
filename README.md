@@ -1,9 +1,15 @@
 # web-token
 
-Generate safe tokens for web and networks
-Fast & memory wise alternative for "jws" & "jwt" & "json web token"
+-   Generate safe tokens for web and networks
+    Fast & memory wise alternative for "jws" & "jwt" & "json web token"
 
-# Sign key
+-   Hash passwords before storing them on the database, best alternative to Bcrypt.
+
+# Sign tokens
+
+Use it to sign cookies, authorizations, ...
+
+## Sign key
 
 ```typescript
 import { sign } from 'web-token';
@@ -35,7 +41,7 @@ _Supported encoding by "::toString" are:_
 -   binary
 -   hex'
 
-# Examples:
+## Examples:
 
 ```javascript
 import { sign } from "web-token";
@@ -52,3 +58,51 @@ var signedObj = sign(
 // Sign Buffer
 var signedObj = sign(Buffer.from("myData", "my-encoding"), "Secret-key");
 ```
+
+# Hash password
+
+## Create Hash
+
+For security reasons: NEVER store your user passwords plain in your database . Store password hashes instead.
+
+```typescript
+import { hash } from "web-token";
+
+var passwordHash= hash(
+	data: string | Buffer,
+	secret: string | Buffer,
+	hashAlgorithm: HashAlgorithm = "sha512"
+);
+
+// Example: Generate password hash & convert it to Hexadecimal
+var hs= hash('pass', 'secretKey').toString('hex');
+```
+
+**_ NOTE: Better to store password hash when ever possible as buffer instead of string. This will enhance performance and reduce required space _**
+
+## Compare passwords
+
+```typescript
+// Password sent by client form
+const userPassword= ...
+// Password stored in the database
+const dbUserPassword= ...
+
+// If password is stored as string, convert it to Buffer first
+// Use the same encoding as when you converted it to string (most cases hex or base64)
+// We recommend to store passwords as buffers when possible to preserve space and performance.
+const buffPassword= Buffer.from(dbUserPassword, 'hex');
+
+// Hash requested password
+var reqPassword= hash(userPassword, 'Your secret');
+
+// And than compare theme
+// Buffer::compare will return "0" if equals, 1 or -1 otherwise
+var areEquals= reqPassword.compare(buffPassword) === 0;
+```
+
+# Author
+
+_khalid RAFIK_
+Senior full Stack Web, Mobile, Data & Security Engineer
+khalid.rfk@gmail.com
