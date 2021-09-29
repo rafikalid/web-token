@@ -1,6 +1,6 @@
 {
 	"name": "web-token",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Fast and safe token generator for web and any app",
 	"main": "dist/commonjs/index.js",
 	"exports": {
@@ -8,7 +8,7 @@
 		"import": "./dist/module/index.mjs"
 	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "gulp --test && jest"
 	},
 	"repository": {
 		"type": "git",
@@ -31,11 +31,13 @@
 		"@types/gulp": "^4.0.8",
 		"@types/gulp-rename": "^2.0.1",
 		"@types/gulp-sourcemaps": "0.0.34",
+		"@types/jest": "^27.0.2",
 		"@types/through2": "^2.0.36",
 		"gulp": "^4.0.2",
 		"gulp-rename": "^2.0.0",
 		"gulp-sourcemaps": "^3.0.0",
 		"gulp-typescript": "^6.0.0-alpha.1",
+		"jest": "^27.2.4",
 		"json5": "^2.2.0",
 		"typescript": "^4.3.5",
 		"typescript-path-fix": "^1.0.5"

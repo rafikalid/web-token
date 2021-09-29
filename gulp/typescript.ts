@@ -27,6 +27,13 @@ const TsProjectCommonjs = GulpTypescript.createProject("tsconfig.json", {
 	module: "CommonJS",
 });
 
+const TsProjectTest = GulpTypescript.createProject("tsconfig.json", {
+	removeComments: isProd,
+	pretty: !isProd,
+	target: "ES2015",
+	module: "CommonJS",
+});
+
 /** Compile as EsNext */
 export function compileEsNext() {
 	return src("src/**/*.ts", {
@@ -52,4 +59,17 @@ export function compileCommonjs() {
 		.pipe(TsProjectCommonjs())
 		.pipe(SrcMap.write("."))
 		.pipe(dest("dist/commonjs"));
+}
+
+/** Compile test files */
+export function compileTestFiles() {
+	return src("src-test/**/*.ts", {
+		nodir: true,
+		since: lastRun(compileTestFiles),
+	})
+		.pipe(SrcMap.init())
+		.pipe(TsProjectTest())
+		.pipe(tsPathFix.gulp())
+		.pipe(SrcMap.write("."))
+		.pipe(dest("test"));
 }

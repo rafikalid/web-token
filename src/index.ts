@@ -1,5 +1,4 @@
 import { createHmac, randomBytes } from "crypto";
-import { ErrorCodes, HError } from "./errors";
 
 const IV = randomBytes(16);
 
@@ -26,12 +25,20 @@ export const _hashSizes: { [k in HashAlgorithm]: number } = {
 export function sign(
 	data: string | Buffer,
 	secret: string | Buffer,
+	expires: number = -1,
 	algorithm: HashAlgorithm = "sha512"
 ): Buffer {
 	if (typeof data === "string") data = Buffer.from(data, "utf8");
+	const hashSize = _hashSizes[algorithm];
+	const hashExpSize = hashSize + 8; // Hash & expires size
+	const resultBuffer = Buffer.allocUnsafe(hashExpSize + data.length);
+	resultBuffer.writeDoubleLE(expires, hashSize);
+	data.copy(resultBuffer, hashExpSize);
+	// Hash
 	const hashAlg = createHmac(algorithm, secret);
-	hashAlg.update(data);
-	return Buffer.concat([hashAlg.digest(), data]);
+	hashAlg.update(resultBuffer.slice(hashSize));
+	hashAlg.digest().copy(resultBuffer);
+	return resultBuffer;
 }
 
 /** verify and return data */
@@ -39,25 +46,27 @@ export function verify(
 	data: string | Buffer,
 	secret: string | Buffer,
 	hashAlgorithm: HashAlgorithm = "sha512"
-) {
+): verifyResult {
 	if (typeof data === "string") data = Buffer.from(data, "base64url");
 	//* Decode signed data: Buffer.concat([B_ENCODE_TYPE_SIGN, hashAlg.digest(), data]);
-	var hashSize = _hashSizes[hashAlgorithm],
-		i: number;
+	var hashSize = _hashSizes[hashAlgorithm];
 	var hash = data.slice(0, hashSize);
-	var resultData = data.slice(hashSize);
+	const expires = data.readDoubleLE(hashSize);
 	//* Check data correct
 	const hashAlg = createHmac(hashAlgorithm, secret);
-	hashAlg.update(resultData);
+	hashAlg.update(data.slice(hashSize));
 	var resultHash = hashAlg.digest();
-	if (resultHash.compare(hash) !== 0)
-		throw new HError(
-			ErrorCodes.WRONG_HASH,
-			`Wrong data hash. Expected: "${resultHash.toString(
-				"hex"
-			)}", received: "${hash.toString("hex")}"`
-		);
-	return resultData;
+	return {
+		isValid: resultHash.compare(hash) === 0,
+		expires: expires,
+		data: data.slice(hashSize + 8),
+	};
+}
+
+export interface verifyResult {
+	data: Buffer;
+	expires: number;
+	isValid: boolean;
 }
 
 // /**

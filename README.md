@@ -19,7 +19,9 @@ const signedKey: Buffer= sign(
 	data:	string | NodeJS.ArrayBufferView,
 	/** Secret key */
 	secret:	string | Buffer,
-	/** Hash algorithm */
+	/** @optional token expiration date as timestamp */
+	expires: number = -1
+	/** @Optional Hash algorithm */
 	algorithm: HashAlgorithm = "sha256"
 );
 
@@ -41,7 +43,7 @@ _Supported encoding by "::toString" are:_
 -   binary
 -   hex'
 
-## Examples:
+### Examples:
 
 ```javascript
 import { sign } from "web-token";
@@ -57,6 +59,78 @@ var signedObj = sign(
 
 // Sign Buffer
 var signedObj = sign(Buffer.from("myData", "my-encoding"), "Secret-key");
+```
+
+## Verify signature
+
+```typescript
+import { verify } from "web-token";
+
+{
+	isValid:	boolean,
+	expires:	number,
+	data:		Buffer
+}= verify(
+	/** Signed data */
+	data: string | Buffer,
+	/** Secret key */
+	secret: string | Buffer,
+	/** @Optional hash algorithm */
+	hashAlgorithm: HashAlgorithm = "sha512"
+);
+```
+
+### Examples
+
+1- Sign & verify simple text:
+
+```javascript
+import { sign, verify } from "web-token";
+const SECRET_KEY = "my-secret-key";
+const TextToEncode = "My-vulnerable-id";
+
+//* SIGN DATA ----------------------
+var signedDataAsText = sign(
+	TextToEncode,
+	SECRET_KEY,
+	55541455485 // Expiration date
+).toString("base64url");
+
+//* VERIFY & DECODE ----------------
+var info = verify(Buffer.from(signedDataAsText, "base64url"), SECRET_KEY);
+if (info.isValid === false) throw new Error("Invalid token");
+else if (info.expires < Date.now()) throw new Error("Expired token");
+
+/**
+ * @Assert TextToEncode === originalData
+ */
+const originalData = info.data.toString();
+```
+
+2- Sign & Verify Object as JSON:
+
+```javascript
+import { sign, verify } from "web-token";
+const SECRET_KEY = "my-secret-key";
+// Object to encode
+const ObjectToEncode = { id: 1, firstName: "khalid", lastName: "RAFIK" };
+
+//* SIGN DATA ----------------------
+var signedDataAsText = sign(
+	JSON.stringify(ObjectToEncode),
+	SECRET_KEY,
+	55541455485 // Expiration date
+).toString("base64url");
+
+//* VERIFY & DECODE ----------------
+var info = verify(Buffer.from(signedDataAsText, "base64url"), SECRET_KEY);
+if (info.isValid === false) throw new Error("Invalid token");
+else if (info.expires < Date.now()) throw new Error("Expired token");
+
+/**
+ * @Assert ObjectToEncode equals originalData
+ */
+const originalData = JSON.parse(info.data.toString());
 ```
 
 # Hash password

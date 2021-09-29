@@ -106,3 +106,4 @@ dist
 # ignore dires
 /dist-test
 /gulp-dist
+/test
