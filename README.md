@@ -175,6 +175,28 @@ var reqPassword= hash(userPassword, 'Your secret');
 var areEquals= reqPassword.compare(buffPassword) === 0;
 ```
 
+# Simple CRC
+If you need only to check for user's writing errors and keep data size reduced without any security concerns, use this method.
+It adds only 1 byte to your initial data. Useful when serializing ids or any tiny data.
+```typescript
+import crc1 from 'web-token';
+
+// Generate tiny NON SECURE checksum ( 0 <= checksum <= 255 )
+const checksum: number= crc1( data: string | Buffer );
+```
+
+## Example of use:
+```typescript
+import crc1 from 'web-token';
+
+const MyId= 'my-id';
+
+// Generate tiny NON SECURE checksum ( 0 <= checksum <= 255 )
+const checksum: number= crc1( MyId );
+
+// Add your ID serializing logic
+```
+
 # Author
 
 _khalid RAFIK_
