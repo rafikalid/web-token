@@ -122,3 +122,19 @@ export function hash(
 	hashAlg.update(data);
 	return hashAlg.digest();
 }
+
+
+/**
+ * CRC1 method
+ * Enables to check strings & buffers using only 1 Byte.
+ * Useful to check ids against *Writing Errors*
+ * If you need security, use "sign" instead
+ */
+export function crc1(input: string | Buffer) {
+	if (typeof input === 'string') input = Buffer.from(input);
+	var accumulation = 0;
+	for (let i = 0, len = input.length; i < len; ++i) {
+		accumulation += input[i];
+	}
+	return accumulation & 255;
+}
